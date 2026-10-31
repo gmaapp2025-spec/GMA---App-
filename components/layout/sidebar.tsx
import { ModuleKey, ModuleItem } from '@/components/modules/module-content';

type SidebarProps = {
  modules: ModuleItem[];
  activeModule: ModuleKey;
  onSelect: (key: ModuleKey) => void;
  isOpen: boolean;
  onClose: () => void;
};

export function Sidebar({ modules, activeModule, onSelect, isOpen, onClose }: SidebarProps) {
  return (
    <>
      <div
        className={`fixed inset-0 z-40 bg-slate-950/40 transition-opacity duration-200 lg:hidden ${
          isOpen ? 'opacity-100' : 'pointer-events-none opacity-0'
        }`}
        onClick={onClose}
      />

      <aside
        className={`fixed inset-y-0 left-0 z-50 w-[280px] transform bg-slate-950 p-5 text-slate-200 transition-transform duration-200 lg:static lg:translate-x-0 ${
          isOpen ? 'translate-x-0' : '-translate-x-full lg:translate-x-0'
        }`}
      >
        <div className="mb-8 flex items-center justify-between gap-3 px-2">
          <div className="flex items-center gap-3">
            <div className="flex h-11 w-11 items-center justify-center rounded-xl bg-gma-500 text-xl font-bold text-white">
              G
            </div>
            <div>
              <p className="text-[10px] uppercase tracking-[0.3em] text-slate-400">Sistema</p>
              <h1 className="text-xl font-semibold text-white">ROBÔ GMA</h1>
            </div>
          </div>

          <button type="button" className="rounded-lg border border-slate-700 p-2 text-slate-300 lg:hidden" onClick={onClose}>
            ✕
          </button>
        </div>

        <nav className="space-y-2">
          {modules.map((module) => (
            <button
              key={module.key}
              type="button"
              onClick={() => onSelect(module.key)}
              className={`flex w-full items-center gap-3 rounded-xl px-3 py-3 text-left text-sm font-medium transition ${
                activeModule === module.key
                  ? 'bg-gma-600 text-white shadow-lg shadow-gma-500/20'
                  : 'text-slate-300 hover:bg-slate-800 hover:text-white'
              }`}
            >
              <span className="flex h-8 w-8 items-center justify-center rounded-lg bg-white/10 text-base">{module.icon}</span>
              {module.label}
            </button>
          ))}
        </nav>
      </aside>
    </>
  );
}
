@@ -1,0 +1,128 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+import { Sidebar } from '@/components/layout/sidebar';
+import { Topbar } from '@/components/layout/topbar';
+import { ModuleKey, modules, renderModuleContent } from '@/components/modules/module-content';
+
+export function AppShell() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeModule, setActiveModule] = useState<ModuleKey>('dashboard');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const currentModuleLabel = useMemo(
+    () => modules.find((module) => module.key === activeModule)?.label ?? 'Dashboard',
+    [activeModule]
+  );
+
+  if (!isAuthenticated) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_#0f766e_0%,_#0f172a_50%,_#020617_100%)] p-4 sm:p-6">
+        <div className="grid w-full max-w-6xl overflow-hidden rounded-3xl border border-white/10 bg-white/10 shadow-2xl backdrop-blur-sm lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="flex flex-col justify-between bg-slate-950/60 p-6 text-white sm:p-8">
+            <div>
+              <div className="mb-8 inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-4 py-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gma-500 text-lg font-bold text-white">G</span>
+                <span className="text-lg font-semibold tracking-[0.2em] text-white">ROBÔ GMA</span>
+              </div>
+
+              <h1 className="max-w-md text-3xl font-bold leading-tight sm:text-4xl">
+                Gestão administrativa inteligente para condomínios.
+              </h1>
+              <p className="mt-5 max-w-md text-base text-slate-300">
+                Centralize operações, comunicação, documentos e controle financeiro em uma plataforma moderna e responsiva.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-4 sm:grid-cols-3">
+              {[
+                { value: '148', label: 'Condomínios' },
+                { value: '36', label: 'Pendências' },
+                { value: '24/7', label: 'Monitoramento' }
+              ].map((item) => (
+                <div key={item.label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                  <p className="text-2xl font-bold text-gma-300">{item.value}</p>
+                  <p className="mt-1 text-sm text-slate-300">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center bg-white p-6 sm:p-8">
+            <div className="w-full max-w-md">
+              <div className="mb-8">
+                <p className="text-sm font-medium uppercase tracking-[0.2em] text-gma-700">Acesso administrativo</p>
+                <h2 className="mt-2 text-3xl font-bold text-slate-900">Entrar no sistema</h2>
+              </div>
+
+              <form
+                className="space-y-5"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  setIsAuthenticated(true);
+                }}
+              >
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">Usuário</label>
+                  <input
+                    defaultValue="admin@gma.com.br"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-gma-500 focus:ring-2 focus:ring-gma-200"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700">Senha</label>
+                  <input
+                    type="password"
+                    defaultValue="123456"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition focus:border-gma-500 focus:ring-2 focus:ring-gma-200"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <label className="inline-flex items-center gap-2 text-slate-600">
+                    <input type="checkbox" className="h-4 w-4 rounded border-slate-300" />
+                    Permanecer conectado
+                  </label>
+                  <button type="button" className="font-medium text-gma-700">
+                    Esqueci a senha
+                  </button>
+                </div>
+
+                <button type="submit" className="w-full rounded-xl bg-gma-600 px-4 py-3 font-semibold text-white transition hover:bg-gma-700">
+                  Acessar painel
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <div className="flex min-h-screen bg-slate-100">
+      <Sidebar
+        modules={modules}
+        activeModule={activeModule}
+        onSelect={(key) => {
+          setActiveModule(key);
+          setMobileMenuOpen(false);
+        }}
+        isOpen={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+      />
+
+      <div className="flex-1">
+        <Topbar
+          title={currentModuleLabel}
+          onMenuToggle={() => setMobileMenuOpen((prev) => !prev)}
+        />
+
+        <main className="p-4 pb-8 sm:p-6">
+          {renderModuleContent(activeModule)}
+        </main>
+      </div>
+    </div>
+  );
+}
